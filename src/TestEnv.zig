@@ -18,7 +18,7 @@ pub fn init(self: *Self) void {
         .write_byte_fn = writeByte,
         .exception_fn = exception,
     };
-    self.core = Core.init(&self.eei);
+    self.core = Core.init(&self.eei, 0);
 }
 
 // Load an ELF test binary's segments to emulated memory
@@ -49,7 +49,10 @@ pub fn loadBinary(self: *Self, bin_path: []const u8) !void {
 // Progress the test environment
 pub fn step(self: *Self) !?void {
     try self.core.step();
-    // TODO: Return null to signal end of test
+    const tohost: u32 = 0x80001000;
+    const val = try self.eei.read(i32, @bitCast(tohost));
+    std.debug.print("tohost: {}\n", .{val});
+    if (val != 0) return null;
 }
 
 // Dump state of the test environment for debugging
